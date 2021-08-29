@@ -1,23 +1,30 @@
+from threading import Thread
 import socket
 
-class Server:
+class Server(Thread):
 
   def __init__(self, host = "localhost", port = 9999):
     self.host = host
     self.port = port
-    self.__status = self.__start()
+    Thread.__init__(self)
       
-  def __start(self):
+  def start(self):
+    print(f"Sever start at {self.host}::{self.port}")
     self.listen_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.listen_sock.bind((self.host, self.port))
     self.listen_sock.listen()
     self.receive_sock, self.adrress = self.listen_sock.accept()
-    return True
+    self.__status = True
+    return Thread.start(self)
 
   def run(self):
     while self.__status:
-      yield self.receive()
-      if self.__status: self.send()
+      data = self.receive()
+      print(data)
+      if data == "EOL": 
+        self.stop()
+      else: 
+        self.send()
       
   def stop(self):
     self.listen_sock.close()
@@ -32,7 +39,4 @@ class Server:
 
 if __name__ == "__main__":  
   server = Server()
-  for data in server.run():
-    print(data)
-    if data == "EOL":
-      server.stop()
+  server.start()  

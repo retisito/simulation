@@ -1,29 +1,37 @@
+from threading import Thread
 import socket
 import time
 
-class Client:
+class Client(Thread):
 
   def __init__(self, host = "localhost", port = 9999):
     self.host = host
     self.port = port
-    self.__status = self.__start()
+    Thread.__init__(self)
 
-  def __start(self):
+  def start(self):
+    print(f"Connection to {self.host}::{self.port}")
     self.send_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
     for i in range(3):
       try:
         self.send_sock.connect((self.host, self.port))
-        return True
+        self.__status = True
+        return Thread.start(self)
       except: 
         print(f"{i+1}.- Connection refused to {self.host}::{self.port}")
         time.sleep(3)
     
-    return False
+    return None
       
   def run(self):  
     while self.__status:
-      yield input(">> ")   
+      data = input(">> ")
+      print(data)
+      self.send(data)
+      print(self.receive())
+      if data == "EOL":
+        self.stop()
   
   def stop(self):     
     self.send_sock.close()
@@ -37,9 +45,4 @@ class Client:
 
 if __name__ == "__main__":
   client = Client()
-  for data in client.run():
-    print(data)
-    client.send(data)
-    print(client.receive())
-    if data == "EOL":
-      client.stop()
+  client.start()
