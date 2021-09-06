@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-# Angel A. Retali Ch.
-# CI: 14501973
-
-
 import threading, queue, time, os, random, sys
 
 class Process: 
